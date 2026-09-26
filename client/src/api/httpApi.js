@@ -1,7 +1,6 @@
-// The real client. Every function here talks to YOUR Express API.
-//
-// This is the file that matters for your finals project. mockApi.js exists so
-// you can build the interface before this has anywhere to point.
+// The real client. Every function here talks to YOUR Express API once it
+// exists (see server/). mockApi.js exists so the interface can be built
+// before the API has anywhere to point.
 
 const BASE = import.meta.env.VITE_API_BASE_URL || ''
 
@@ -12,7 +11,6 @@ async function request(path, options) {
   })
 
   if (!response.ok) {
-    // Try to use the API's own message; fall back to the status line.
     let message = `${response.status} ${response.statusText}`
     try {
       const body = await response.json()
@@ -26,15 +24,19 @@ async function request(path, options) {
   return response.status === 204 ? null : response.json()
 }
 
-export const listSightings = () => request('/api/sightings')
+// ---------------- Sessions ----------------
+export const listSessions = () => request('/api/sessions')
+export const getSession = (id) => request(`/api/sessions/${id}`)
+export const createSession = (input) =>
+  request('/api/sessions', { method: 'POST', body: JSON.stringify(input) })
+export const updateSession = (id, patch) =>
+  request(`/api/sessions/${id}`, { method: 'PATCH', body: JSON.stringify(patch) })
 
-export const getSighting = (id) => request(`/api/sightings/${id}`)
+// ---------------- Game poll ----------------
+export const listGames = () => request('/api/games')
+export const voteGame = (id) => request(`/api/games/${id}/vote`, { method: 'POST' })
 
-export const createSighting = (input) =>
-  request('/api/sightings', { method: 'POST', body: JSON.stringify(input) })
-
-export const updateSighting = (id, input) =>
-  request(`/api/sightings/${id}`, { method: 'PUT', body: JSON.stringify(input) })
-
-export const deleteSighting = (id) =>
-  request(`/api/sightings/${id}`, { method: 'DELETE' })
+// ---------------- Availability ----------------
+export const getAvailability = () => request('/api/availability')
+export const saveAvailability = (mine) =>
+  request('/api/availability', { method: 'PUT', body: JSON.stringify(mine) })

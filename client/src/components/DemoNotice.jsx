@@ -1,23 +1,15 @@
-import { USING_MOCK_API } from '../api'
+import { USING_MOCK_API } from '../api/index.js'
 
-// Shown only while the simulated backend is switched on. It disappears by
-// itself the moment you set VITE_USE_MOCK_API=false, because it reads the same
-// variable the API layer does.
-//
-// Leave this in. A deployment that quietly pretends to have a server is the
-// difference between a deliberate staging site and a submission hoping nobody
-// checks.
+// Tells whoever's looking at the deployed site that this is running on fake,
+// browser-only data — same idea as the template's original DemoNotice.
 export default function DemoNotice() {
   if (!USING_MOCK_API) return null
 
   return (
-    <div className="demo-notice" role="status">
-      <strong>Demo mode.</strong> This deployment exists to show the interface.
-      It runs on a <strong>simulated backend</strong>: everything you add is
-      stored in your own browser, is shared with nobody, and disappears when you
-      clear your browsing data. There is no server and no database behind this
-      page. The full version runs against an Express API and a PostgreSQL
-      database, deployed separately. See the README.
-    </div>
+    <p className="small" style={{ background: '#1e293b', padding: 12, borderRadius: 6 }}>
+      Demo mode: everything here is saved only in your own browser. Nothing is
+      shared between devices yet — that happens once the real backend and
+      database are connected.
+    </p>
   )
 }

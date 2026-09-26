@@ -1,127 +1,154 @@
-/* Deliberately plain. Module 3 covered styling in React properly: CSS modules,
-   Tailwind, styled-components, a component library. Replace this with whichever
-   you chose and can defend. */
-
+/* ---- Design tokens (from the SquadNight Design System) ---- */
 :root {
-  color-scheme: light dark;
-  --bg: #fbfbfd;
-  --fg: #1a1a1f;
-  --muted: #5c5c6b;
-  --line: #dcdce6;
-  --card: #ffffff;
-  --accent: #4a3f8f;
-  --warn-bg: #fff6dd;
-  --warn-line: #e0bf6a;
-  --error-bg: #fdeaea;
-  --error-line: #d98a8a;
+  --color-primary: #4f46e5;
+  --color-accent: #15803d;
+  --color-bg: #0f172a;
+  --color-surface: #1e293b;
+  --color-text: #e2e8f0;
+  --color-text-muted: #94a3b8;
+
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-4: 32px;
+
+  --font-size-heading: 28px;
+  --font-size-body: 16px;
+  --font-size-small: 13px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #14141a;
-    --fg: #ececf2;
-    --muted: #a0a0b0;
-    --line: #33333f;
-    --card: #1d1d25;
-    --accent: #a99cf0;
-    --warn-bg: #3a3320;
-    --warn-line: #7d6a30;
-    --error-bg: #3a2323;
-    --error-line: #7d4040;
-  }
+* {
+  box-sizing: border-box;
 }
-
-* { box-sizing: border-box; }
 
 body {
   margin: 0;
-  background: var(--bg);
-  color: var(--fg);
-  font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
+  font-size: var(--font-size-body);
 }
 
-.page { max-width: 44rem; margin: 0 auto; padding: 2rem 1rem 4rem; }
+a {
+  color: inherit;
+  text-decoration: none;
+}
 
-h1 { margin: 0 0 .25rem; font-size: 1.9rem; }
-h2 { margin: 0 0 .75rem; font-size: 1.15rem; }
-h3 { margin: 0; font-size: 1.05rem; }
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: var(--space-2);
+}
 
-.lede, .muted { color: var(--muted); }
-.lede { margin-top: 0; }
+h1, h2, h3 {
+  font-size: var(--font-size-heading);
+  margin: 0 0 var(--space-2);
+}
 
-.demo-notice {
-  background: var(--warn-bg);
-  border: 1px solid var(--warn-line);
-  border-radius: .5rem;
-  padding: .9rem 1rem;
-  margin: 1.5rem 0;
+.small {
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
 }
 
 .error {
-  background: var(--error-bg);
-  border: 1px solid var(--error-line);
-  border-radius: .5rem;
-  padding: .75rem 1rem;
+  background: #7f1d1d;
+  padding: var(--space-2);
+  border-radius: 6px;
 }
 
-.card {
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: .5rem;
-  padding: 1rem;
-  margin-bottom: 1rem;
-}
-
-form.card { display: flex; flex-direction: column; gap: .35rem; }
-
-label { font-size: .85rem; color: var(--muted); margin-top: .5rem; }
-
-input, textarea {
-  font: inherit;
-  color: inherit;
-  background: var(--bg);
-  border: 1px solid var(--line);
-  border-radius: .35rem;
-  padding: .5rem .6rem;
-}
-
-button {
-  font: inherit;
-  cursor: pointer;
-  border: 1px solid var(--accent);
-  background: var(--accent);
-  color: #fff;
-  border-radius: .35rem;
-  padding: .45rem .9rem;
-  margin-top: .75rem;
-  align-self: flex-start;
-}
-
-button:disabled { opacity: .6; cursor: default; }
-
-/* Never remove a focus outline without replacing it. Keyboard users need to
-   see where they are, and it is checked. */
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-
-.list { list-style: none; padding: 0; margin: 0; }
-
-.row-head { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
-
-.spooky { color: var(--accent); letter-spacing: .15em; }
-
-.card footer {
+/* ---- Header / Nav ---- */
+.header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 1rem;
-  margin-top: .5rem;
-  font-size: .85rem;
-  color: var(--muted);
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--color-surface);
 }
 
-.card footer button {
-  margin-top: 0;
-  background: transparent;
-  color: var(--muted);
-  border-color: var(--line);
+.header .logo {
+  font-weight: 700;
+}
+
+.header nav a {
+  margin-left: var(--space-2);
+  font-size: var(--font-size-small);
+  color: var(--color-text-muted);
+}
+
+.header nav a.active {
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+/* ---- Button ---- */
+.btn {
+  display: inline-block;
+  border: none;
+  border-radius: 6px;
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--font-size-small);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-primary { background: var(--color-primary); color: #fff; }
+.btn-accent { background: var(--color-accent); color: #fff; }
+.btn-ghost { background: transparent; color: var(--color-text-muted); border: 1px solid var(--color-surface); }
+
+/* ---- Card ---- */
+.card {
+  background: var(--color-surface);
+  border-radius: 8px;
+  padding: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.card .title { font-weight: 700; margin-bottom: var(--space-1); }
+.card .meta { color: var(--color-text-muted); font-size: var(--font-size-small); margin-bottom: var(--space-1); }
+
+/* ---- Grid layouts (responsive: stack below 768px) ---- */
+.grid-2 { display: grid; grid-template-columns: 1fr; gap: var(--space-2); }
+.grid-3 { display: grid; grid-template-columns: 1fr; gap: var(--space-2); }
+
+@media (min-width: 768px) {
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+  .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+}
+
+/* ---- MemberBadge ---- */
+.badge-row { display: flex; gap: var(--space-1); }
+
+.avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--color-primary); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; position: relative;
+}
+
+.status-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--color-accent); border: 2px solid var(--color-bg);
+  position: absolute; bottom: -1px; right: -1px;
+}
+
+/* ---- PollOption ---- */
+.poll-option { background: #0000001a; border-radius: 6px; padding: var(--space-1) var(--space-2); margin-bottom: var(--space-1); }
+.poll-option-top { display: flex; justify-content: space-between; align-items: center; font-size: var(--font-size-small); }
+.poll-bar-track { background: #ffffff22; border-radius: 4px; height: 6px; margin-top: var(--space-1); }
+.poll-bar-fill { background: var(--color-primary); border-radius: 4px; height: 6px; }
+
+/* ---- Forms ---- */
+label { display: block; font-size: var(--font-size-small); margin-bottom: 4px; color: var(--color-text-muted); }
+
+input, textarea, select {
+  width: 100%; padding: var(--space-1); margin-bottom: var(--space-2);
+  border-radius: 4px; border: 1px solid var(--color-surface);
+  background: var(--color-bg); color: var(--color-text); font-family: inherit;
+}
+
+table.week { width: 100%; border-collapse: collapse; font-size: var(--font-size-small); margin-bottom: var(--space-2); }
+table.week th, table.week td { border: 1px solid var(--color-surface); padding: 6px; text-align: center; }
+
+.step-label {
+  color: var(--color-text-muted); font-size: var(--font-size-small);
+  text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: var(--space-1);
 }
