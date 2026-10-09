@@ -381,3 +381,57 @@ table.week th { background: color-mix(in srgb, var(--color-text) 5%, transparent
   color: var(--color-text);
   margin-bottom: var(--space-1);
 }
+
+/* Atmosphere, responsive page rhythm, and theme-specific identity */
+body { position: relative; isolation: isolate; }
+body::before, body::after { content: ''; position: fixed; inset: 0; pointer-events: none; z-index: -1; }
+body::before { opacity: .8; background: radial-gradient(ellipse at 12% 12%, rgba(23, 190, 160, .13), transparent 35%), radial-gradient(ellipse at 86% 28%, rgba(36, 108, 170, .12), transparent 38%); }
+body::after { opacity: .18; background-image: radial-gradient(circle, #d7fff4 1px, transparent 1.5px), radial-gradient(circle, #b6d8ff 1px, transparent 1.5px); background-size: 97px 113px, 151px 173px; background-position: 12px 18px, 61px 74px; }
+:root[data-theme='sakura'] body::before { opacity: .7; background: radial-gradient(ellipse at 12% 12%, rgba(255, 151, 190, .20), transparent 37%), radial-gradient(ellipse at 90% 22%, rgba(255, 196, 216, .24), transparent 40%), linear-gradient(180deg, rgba(255, 239, 246, .6), transparent 65%); }
+:root[data-theme='sakura'] body::after { opacity: .22; background-image: radial-gradient(ellipse at center, rgba(239, 116, 164, .65) 0 2px, transparent 3px), radial-gradient(ellipse at center, rgba(255, 186, 207, .75) 0 3px, transparent 4px); background-size: 83px 97px, 137px 151px; }
+.page-shell { padding-top: clamp(22px, 4vw, 42px); padding-bottom: 48px; }
+.page-heading { margin-bottom: 22px; max-width: 760px; }
+.page-heading h1 { font-size: clamp(28px, 4vw, 40px); line-height: 1.12; margin: 6px 0 10px; }
+.page-heading p { max-width: 650px; line-height: 1.65; }
+.eyebrow { display: inline-block; color: var(--color-primary-light); font-size: 11px; font-weight: 800; letter-spacing: .14em; }
+.card { backdrop-filter: blur(12px); }
+.availability-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.availability-day { border: 1px solid var(--color-border); border-radius: 14px; padding: 13px; background: color-mix(in srgb, var(--color-bg) 36%, var(--color-surface)); min-width: 0; }
+.availability-day.is-available { border-color: color-mix(in srgb, var(--color-accent) 52%, var(--color-border)); background: color-mix(in srgb, var(--color-accent) 7%, var(--color-surface)); }
+.availability-day-toggle { display: flex; align-items: center; gap: 8px; color: var(--color-text); font-size: 14px; font-weight: 800; cursor: pointer; }
+.availability-day-toggle input, .custom-game-toggle input { width: auto; margin: 0; accent-color: var(--color-primary); }
+.availability-indicator { margin-left: auto; font-size: 10px; color: var(--color-text-muted); font-weight: 600; }
+.availability-day.is-available .availability-indicator { color: var(--color-accent-light); }
+.availability-times { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+.availability-times label { min-width: 0; font-size: 11px; }
+.availability-times input { padding: 8px 6px; margin: 5px 0 0; font-size: 12px; min-width: 0; }
+.availability-times input:disabled { opacity: .35; }
+.availability-actions, .planner-submit { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 18px; }
+.save-confirmation { color: var(--color-accent-light); font-size: 13px; font-weight: 700; }
+.availability-members { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.availability-member { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--color-border); border-radius: 12px; }
+.availability-member p { margin: 4px 0 0; }
+.member-avatar { display: grid; place-items: center; width: 36px; height: 36px; flex: 0 0 36px; border-radius: 12px; background: color-mix(in srgb, var(--color-primary) 18%, var(--color-surface)); color: var(--color-primary-light); font-weight: 800; }
+.loading-skeleton { height: 120px; border-radius: 12px; background: linear-gradient(90deg, var(--color-surface) 25%, var(--color-surface-hover) 50%, var(--color-surface) 75%); background-size: 200% 100%; animation: skeleton-shimmer 1.4s infinite; }
+@keyframes skeleton-shimmer { to { background-position: -200% 0; } }
+.game-search { display: flex; align-items: center; gap: 12px; }
+.game-search input { flex: 1; min-width: 0; }
+.game-search .small { white-space: nowrap; }
+.game-group { margin-top: 18px; }
+.game-group h3 { font-size: 14px; margin-bottom: 10px; color: var(--color-text-muted); }
+.game-choice-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.game-choice { display: flex; align-items: center; gap: 9px; text-align: left; min-width: 0; padding: 11px 12px; color: var(--color-text); background: color-mix(in srgb, var(--color-bg) 45%, var(--color-surface)); border: 1px solid var(--color-border); border-radius: 11px; font: 600 12px var(--font-sans); cursor: pointer; transition: border-color .15s ease, transform .15s ease, background .15s ease; }
+.game-choice:hover { transform: translateY(-1px); border-color: color-mix(in srgb, var(--color-primary) 55%, var(--color-border)); }
+.game-choice.selected, .custom-game.selected { border-color: var(--color-primary); background: color-mix(in srgb, var(--color-primary) 10%, var(--color-surface)); }
+.game-choice-icon { flex: 0 0 auto; }
+.game-choice > span:nth-child(2) { flex: 1; }
+.game-check { color: var(--color-primary-light); font-weight: 900; }
+.custom-game { margin-top: 18px; border: 1px dashed var(--color-border); border-radius: 12px; padding: 13px; }
+.custom-game-toggle { display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--color-text); }
+.custom-game > input { margin: 12px 0 0; }
+.schedule-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.schedule-fields label { min-width: 0; }
+.planner-submit .small { line-height: 1.5; }
+:root[data-theme='sakura'] .game-choice.selected { color: #861044; }
+@media (min-width: 760px) { .availability-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } .game-choice-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .availability-grid, .availability-members, .game-choice-grid, .schedule-fields { grid-template-columns: 1fr; } .game-search { align-items: stretch; flex-direction: column; gap: 0; } .availability-times { grid-template-columns: 1fr 1fr; } .page-shell { padding-left: 14px; padding-right: 14px; } }
