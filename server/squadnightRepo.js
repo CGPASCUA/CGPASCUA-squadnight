@@ -124,15 +124,19 @@ export async function saveAvailability(pool, userId, squadId, mine) {
   return await getAvailability(pool, userId, squadId)
 }
 
+
 export async function voteAttendance(pool, id, userId, username, attending, squadId) {
   const { rows } = await pool.query(
     `UPDATE sessions
      SET attendance = COALESCE(attendance, '{}'::jsonb)
        || jsonb_build_object($3::text, $4::boolean)
-     WHERE id = $1 AND squad_id = $2 AND status = 'planned'
+     WHERE id = $1
+       AND squad_id = $2
+       AND status = 'planned'
      RETURNING id, attendance`,
     [id, squadId, username, attending]
   )
+
   return rows[0] ?? null
 }
 
