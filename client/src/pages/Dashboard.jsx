@@ -37,9 +37,16 @@ export default function Dashboard() {
   async function vote(id) { setGames(await voteGame(id)) }
 
   async function setAttendance(session, attending) {
+  try {
+    setError(null)
+
     await voteAttendance(session.id, attending)
-    setSessions(await listSessions())
+
+    await load()
+  } catch (err) {
+    setError(err)
   }
+}
 
   if (status === 'loading') return <div className="container">Loading…</div>
   if (status === 'error') {
