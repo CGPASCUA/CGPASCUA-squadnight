@@ -1,4 +1,4 @@
-export default function MemberBadge({ initials, color = '#4f46e5', online = true }) {
+export default function MemberBadge({ initials, color = '#f59e0b', online = true }) {
   return (
     <div className="avatar" style={{ background: color }}>
       {initials}

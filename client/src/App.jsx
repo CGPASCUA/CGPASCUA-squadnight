@@ -9,7 +9,6 @@ import History from './pages/History.jsx'
 
 export default function App() {
   const location = useLocation()
-  // The Join screen has no nav bar — you're not "in" a squad yet.
   const hideHeader = location.pathname === '/join' || location.pathname === '/'
 
   return (

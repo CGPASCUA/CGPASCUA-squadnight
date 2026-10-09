@@ -1,23 +1,9 @@
-// The simulated backend for SquadNight.
-//
-// Same function names, same return shapes, and the same kind of failure as
-// httpApi.js, so the pages cannot tell the difference. Data lives in the
-// visitor's own browser (localStorage) and goes no further.
-//
-// This is what makes the GitHub Pages link work before the Express API and
-// Postgres database exist. It is NOT the finished project — see
-// content/extending-your-app page 3 for why, and START-HERE.md for the plan
-// to replace this with server/ + a real database.
-
 import seed from './seed.json'
 
 const SESSIONS_KEY = 'squadnight:sessions'
 const GAMES_KEY = 'squadnight:games'
 const AVAILABILITY_KEY = 'squadnight:availability'
 
-// A real network is not instant. Keeping this delay is what forces the
-// loading states to actually get built now, instead of only being discovered
-// the day this gets swapped for the real API.
 const delay = (ms = 250) => new Promise((resolve) => setTimeout(resolve, ms))
 
 function readJSON(key, fallback) {
@@ -26,7 +12,6 @@ function readJSON(key, fallback) {
     try {
       return JSON.parse(stored)
     } catch {
-      // Corrupted storage. Start again rather than crashing the app.
       localStorage.removeItem(key)
     }
   }
@@ -38,8 +23,6 @@ function writeJSON(key, value) {
   localStorage.setItem(key, JSON.stringify(value))
   return value
 }
-
-// ---------------- Sessions (dashboard / planner / session details / history) ----------------
 
 export async function listSessions() {
   await delay()
@@ -78,8 +61,6 @@ export async function updateSession(id, patch) {
   return rows[index]
 }
 
-// ---------------- Game poll (dashboard / planner) ----------------
-
 export async function listGames() {
   await delay()
   return readJSON(GAMES_KEY, seed.games)
@@ -92,8 +73,6 @@ export async function voteGame(id) {
   writeJSON(GAMES_KEY, updated)
   return updated
 }
-
-// ---------------- Availability ----------------
 
 export async function getAvailability() {
   await delay()

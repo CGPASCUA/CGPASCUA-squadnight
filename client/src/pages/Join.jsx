@@ -2,13 +2,10 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Card from '../components/Card.jsx'
 import Button from '../components/Button.jsx'
+import Logo from '../components/Logo.jsx'
 
-// No real backend account system yet, so this just remembers a name + squad
-// code in localStorage and moves on to the Dashboard. Once there's a real
-// squads table, "Create" would POST a new squad and "Join" would check the
-// code against it.
 function randomSquadCode() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' // no confusing 0/O/1/I
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
   let code = ''
   for (let i = 0; i < 4; i++) code += chars[Math.floor(Math.random() * chars.length)]
   return `SQUAD-${code}`
@@ -16,7 +13,7 @@ function randomSquadCode() {
 
 export default function Join() {
   const navigate = useNavigate()
-  const [mode, setMode] = useState('join') // "join" | "create"
+  const [mode, setMode] = useState('join')
   const [username, setUsername] = useState('')
   const [squadCode, setSquadCode] = useState('')
   const [createdCode, setCreatedCode] = useState('')
@@ -56,24 +53,16 @@ export default function Join() {
     <div className="join-page">
       <div className="join-card-wrap">
         <div className="join-brand">
-          <span className="join-logo-mark">🎮</span>
+          <Logo size={56} />
           <h1>SquadNight</h1>
           <p className="small">Plan your squad's next game night.</p>
         </div>
 
         <div className="join-tabs">
-          <button
-            className={`join-tab ${mode === 'join' ? 'active' : ''}`}
-            onClick={() => switchMode('join')}
-            type="button"
-          >
+          <button className={`join-tab ${mode === 'join' ? 'active' : ''}`} onClick={() => switchMode('join')} type="button">
             Join Squad
           </button>
-          <button
-            className={`join-tab ${mode === 'create' ? 'active' : ''}`}
-            onClick={() => switchMode('create')}
-            type="button"
-          >
+          <button className={`join-tab ${mode === 'create' ? 'active' : ''}`} onClick={() => switchMode('create')} type="button">
             Create Squad
           </button>
         </div>
@@ -84,22 +73,11 @@ export default function Join() {
               <label>Your Name</label>
               <input value={username} onChange={(e) => setUsername(e.target.value)} placeholder="e.g. MikMik" />
               <label>Squad Code</label>
-              <input
-                value={squadCode}
-                onChange={(e) => setSquadCode(e.target.value)}
-                placeholder="e.g. SQUAD-4XJ2"
-              />
-              {error && (
-                <div className="small" style={{ color: '#f87171', marginBottom: 12 }}>
-                  {error}
-                </div>
-              )}
-              <Button type="submit" variant="accent">
-                Join Squad
-              </Button>
+              <input value={squadCode} onChange={(e) => setSquadCode(e.target.value)} placeholder="e.g. SQUAD-4XJ2" />
+              {error && <div className="small" style={{ color: '#f87171', marginBottom: 12 }}>{error}</div>}
+              <Button type="submit" variant="accent">Join Squad</Button>
               <div className="small" style={{ marginTop: 10 }}>
-                Don't have a code? Ask whoever created your squad, or switch to
-                "Create Squad" to start your own.
+                Don't have a code? Ask whoever created your squad, or switch to "Create Squad" to start your own.
               </div>
             </form>
           )}
@@ -108,14 +86,8 @@ export default function Join() {
             <form onSubmit={handleCreate}>
               <label>Your Name</label>
               <input value={username} onChange={(e) => setUsername(e.target.value)} placeholder="e.g. MikMik" />
-              {error && (
-                <div className="small" style={{ color: '#f87171', marginBottom: 12 }}>
-                  {error}
-                </div>
-              )}
-              <Button type="submit" variant="primary">
-                Create Squad
-              </Button>
+              {error && <div className="small" style={{ color: '#f87171', marginBottom: 12 }}>{error}</div>}
+              <Button type="submit" variant="primary">Create Squad</Button>
               <div className="small" style={{ marginTop: 10 }}>
                 We'll generate a squad code you can share with your friends.
               </div>
@@ -127,8 +99,7 @@ export default function Join() {
               <label>Your squad code</label>
               <div className="squad-code-display">{createdCode}</div>
               <div className="small" style={{ marginBottom: 16 }}>
-                Share this with your squad so they can join with "Join Squad".
-                You can find it again later in the header.
+                Share this with your squad so they can join with "Join Squad". You can find it again later in the header.
               </div>
               <Button variant="accent" onClick={() => enterApp(username.trim(), createdCode)}>
                 Continue to Dashboard

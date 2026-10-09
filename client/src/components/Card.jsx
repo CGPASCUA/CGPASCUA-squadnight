@@ -1,4 +1,3 @@
-// Generic card used for game-night summaries, session cards, etc.
 export default function Card({ title, meta, children }) {
   return (
     <div className="card">
