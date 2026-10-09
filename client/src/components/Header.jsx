@@ -8,10 +8,11 @@ import {
   LogOut,
   Moon,
   Sparkles,
+  ChevronDown, Users,
 } from 'lucide-react'
 import Logo from './Logo.jsx'
 import { useNavigate } from 'react-router-dom'
-import { logoutAccount } from '../api/index.js'
+import { logoutAccount, getMySquad } from '../api/index.js'
 
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -23,7 +24,12 @@ const NAV_ITEMS = [
 export default function Header() {
   const username = localStorage.getItem('squadnight_username')
   const navigate = useNavigate()
+  const location = window.location
   const [theme, setTheme] = useState(() => localStorage.getItem('squadnight_theme') || 'midnight')
+  const [squad, setSquad] = useState(null)
+  const [squadOpen, setSquadOpen] = useState(false)
+
+  useEffect(() => { getMySquad().then(setSquad).catch(() => setSquad(null)) }, [location.pathname])
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme
@@ -59,7 +65,17 @@ export default function Header() {
       </nav>
 
       <div className="header-right">
-        {username && <span className="squad-pill"><span className="squad-pill-user">{username}</span></span>}
+        {username && <div style={{position:'relative'}}>
+          <button type="button" className="squad-pill" onClick={() => setSquadOpen(v => !v)} aria-expanded={squadOpen}>
+            <span className="squad-pill-user">{squad?.name || 'No squad'}</span><ChevronDown size={14}/>
+          </button>
+          {squadOpen && <div style={{position:'absolute',right:0,top:'calc(100% + 8px)',width:260,maxHeight:340,overflowY:'auto',zIndex:30,padding:14,background:'var(--color-surface)',border:'1px solid var(--color-border)',borderRadius:14,boxShadow:'var(--shadow-card)'}}>
+            {squad ? <><strong>{squad.name}</strong><p className="small" style={{margin:'6px 0 10px'}}><Users size={13} style={{verticalAlign:'middle'}}/> {squad.members?.length ?? 0} members · Code: {squad.joinCode}</p>
+              {(squad.members || []).map(member => <div key={member.id} style={{display:'flex',justifyContent:'space-between',gap:8,padding:'7px 0',borderTop:'1px solid var(--color-border)',fontSize:13}}><span>{member.username}{member.id === localStorage.getItem('squadnight_userId') ? ' (you)' : ''}</span><span className="small">{member.role}</span></div>)}
+              <button type="button" className="btn btn-ghost" style={{width:'100%',marginTop:10}} onClick={() => {setSquadOpen(false);navigate('/squad')}}>Manage squad / switch</button>
+            </> : <><p className="small">You haven't joined a squad yet.</p><button type="button" className="btn btn-primary" onClick={() => {setSquadOpen(false);navigate('/squad')}}>Find a squad</button></>}
+          </div>}
+        </div>}
         <button className="theme-toggle" onClick={handleLogout} title="Log out" aria-label="Log out">
           <LogOut size={16} />
         </button>

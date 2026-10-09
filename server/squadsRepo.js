@@ -80,3 +80,34 @@ export async function joinSquad(pool, userId, code) {
     throw error
   } finally { client.release() }
 }
+
+export async function leaveSquad(pool, userId) {
+  const client = await pool.connect()
+  try {
+    await client.query('BEGIN')
+    const membership = await client.query(
+      `SELECT sm.squad_id AS "squadId", sm.role, s.created_by AS "createdBy",
+              (SELECT count(*)::int FROM squad_members x WHERE x.squad_id=sm.squad_id) AS "memberCount"
+         FROM squad_members sm JOIN squads s ON s.id=sm.squad_id
+        WHERE sm.user_id=$1 FOR UPDATE OF sm`, [userId]
+    )
+    if (!membership.rowCount) {
+      const error = new Error('You are not currently in a squad.')
+      error.status = 404
+      throw error
+    }
+    const current = membership.rows[0]
+    if (current.role === 'owner' && current.memberCount > 1) {
+      const error = new Error('As the owner, transfer ownership before leaving this squad.')
+      error.status = 409
+      throw error
+    }
+    await client.query('DELETE FROM squad_members WHERE user_id=$1', [userId])
+    if (current.memberCount === 1) await client.query('DELETE FROM squads WHERE id=$1', [current.squadId])
+    await client.query('COMMIT')
+    return { ok: true }
+  } catch (error) {
+    await client.query('ROLLBACK')
+    throw error
+  } finally { client.release() }
+}

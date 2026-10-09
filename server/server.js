@@ -67,6 +67,10 @@ app.post('/api/squads', async (req, res, next) => {
   try { res.status(201).json({ squad: await squads.createSquad(pool, req.user.id, name) }) }
   catch (error) { if (error.status) return res.status(error.status).json({ error: error.message }); next(error) }
 })
+app.post('/api/squads/leave', async (req, res, next) => {
+  try { res.json(await squads.leaveSquad(pool, req.user.id)) }
+  catch (error) { if (error.status) return res.status(error.status).json({ error: error.message }); next(error) }
+})
 app.post('/api/squads/join', async (req, res, next) => {
   const code = typeof req.body?.code === 'string' ? req.body.code.trim() : ''
   if (!/^[A-Z0-9]{8}$/i.test(code)) return res.status(400).json({ error: 'Enter the 8-character squad code.' })

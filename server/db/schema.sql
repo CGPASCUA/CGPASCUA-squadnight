@@ -59,3 +59,8 @@ CREATE TABLE IF NOT EXISTS squad_members (
   UNIQUE (user_id)
 );
 CREATE INDEX IF NOT EXISTS squad_members_squad_idx ON squad_members (squad_id, joined_at);
+
+
+-- Useful membership lookup and consistency support for the live PostgreSQL database.
+CREATE INDEX IF NOT EXISTS squads_created_by_idx ON squads (created_by);
+CREATE INDEX IF NOT EXISTS squad_members_user_idx ON squad_members (user_id);

@@ -48,3 +48,4 @@ export const getCurrentAccount = () => request('/api/auth/me')
 export const getMySquad = async () => (await request('/api/squads/me')).squad
 export const createSquad = async (name) => (await request('/api/squads', { method: 'POST', body: JSON.stringify({ name }) })).squad
 export const joinSquad = async (code) => (await request('/api/squads/join', { method: 'POST', body: JSON.stringify({ code }) })).squad
+export const leaveSquad = async () => request('/api/squads/leave', { method: 'POST' })

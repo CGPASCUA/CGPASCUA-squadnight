@@ -20,4 +20,4 @@ export const {
 export const { registerAccount, loginAccount, logoutAccount, getCurrentAccount } = httpApi
 
 // Squad creation and membership must always use the real backend.
-export const { getMySquad, createSquad, joinSquad } = httpApi
+export const { getMySquad, createSquad, joinSquad, leaveSquad } = httpApi

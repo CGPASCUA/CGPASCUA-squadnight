@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { listSessions, listGames, voteGame } from '../api/index.js'
+import { listSessions, listGames, voteGame, getMySquad } from '../api/index.js'
 import Card from '../components/Card.jsx'
 import Button from '../components/Button.jsx'
 import PollOption from '../components/PollOption.jsx'
@@ -12,14 +12,16 @@ export default function Dashboard() {
   const [error, setError] = useState(null)
   const [sessions, setSessions] = useState([])
   const [games, setGames] = useState([])
+  const [squad, setSquad] = useState(null)
 
   async function load() {
     setStatus('loading')
     setError(null)
     try {
-      const [sessionRows, gameRows] = await Promise.all([listSessions(), listGames()])
+      const [sessionRows, gameRows, currentSquad] = await Promise.all([listSessions(), listGames(), getMySquad()])
       setSessions(sessionRows)
       setGames(gameRows)
+      setSquad(currentSquad)
       setStatus('ready')
     } catch (caught) {
       setError(caught)
@@ -51,7 +53,9 @@ export default function Dashboard() {
   return (
     <div className="container">
       <DemoNotice />
-      <Card title="Squad Info" meta="Member Count: 5" />
+      <Card title={squad?.name || 'Squad Info'} meta={`${squad?.members?.length ?? 0} ${(squad?.members?.length ?? 0) === 1 ? 'member' : 'members'}`}>
+        {squad ? <><p className="small">Invite code: <strong>{squad.joinCode}</strong></p><div style={{display:'flex',flexWrap:'wrap',gap:8}}>{(squad.members || []).map(m => <span key={m.id} className="small" style={{padding:'6px 10px',border:'1px solid var(--color-border)',borderRadius:999}}>{m.username}{m.role === 'owner' ? ' · Owner' : ''}</span>)}</div></> : <p className="small">You are not in a squad yet. <Link to="/squad">Find or create a squad</Link>.</p>}
+      </Card>
 
       <div className="grid-2">
         {upcoming ? (
@@ -73,7 +77,7 @@ export default function Dashboard() {
       </div>
 
       <div className="grid-2">
-        <Card title="Availability Summary" meta="3 of 5 members submitted">
+        <Card title="Availability Summary" meta={`${squad?.members?.length ?? 0} squad members`}>
           <Link to="/availability"><Button variant="primary">Set Availability</Button></Link>
         </Card>
         <Card title="Suggested Schedule" meta="Best overlap: Fri 8:00 PM">
