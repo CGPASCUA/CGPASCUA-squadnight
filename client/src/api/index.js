@@ -18,3 +18,6 @@ export const {
 
 // Authentication always uses the real API; account credentials are never mocked.
 export const { registerAccount, loginAccount, logoutAccount, getCurrentAccount } = httpApi
+
+// Squad creation and membership must always use the real backend.
+export const { getMySquad, createSquad, joinSquad } = httpApi

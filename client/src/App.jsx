@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import Header from './components/Header.jsx'
 import Join from './pages/Join.jsx'
+import SquadSetup from './pages/SquadSetup.jsx'
 import Dashboard from './pages/Dashboard.jsx'
 import Availability from './pages/Availability.jsx'
 import Planner from './pages/Planner.jsx'
@@ -14,13 +15,14 @@ function Protected({ children }) {
 export default function App() {
   const location = useLocation()
   const authenticated = Boolean(localStorage.getItem('squadnight_token'))
-  const hideHeader = location.pathname === '/join' || location.pathname === '/'
+  const hideHeader = ['/join', '/', '/squad'].includes(location.pathname)
   return (
     <>
       {!hideHeader && <Header />}
       <Routes>
-        <Route path="/" element={<Navigate to={authenticated ? '/dashboard' : '/join'} replace />} />
-        <Route path="/join" element={authenticated ? <Navigate to="/dashboard" replace /> : <Join />} />
+        <Route path="/" element={<Navigate to={authenticated ? '/squad' : '/join'} replace />} />
+        <Route path="/join" element={authenticated ? <Navigate to="/squad" replace /> : <Join />} />
+        <Route path="/squad" element={<Protected><SquadSetup /></Protected>} />
         <Route path="/dashboard" element={<Protected><Dashboard /></Protected>} />
         <Route path="/availability" element={<Protected><Availability /></Protected>} />
         <Route path="/planner" element={<Protected><Planner /></Protected>} />

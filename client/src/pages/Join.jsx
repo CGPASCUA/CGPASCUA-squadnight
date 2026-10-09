@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import Card from '../components/Card.jsx'
 import Button from '../components/Button.jsx'
 import Logo from '../components/Logo.jsx'
-import { registerAccount, loginAccount } from '../api/index.js'
+import { registerAccount, loginAccount, getMySquad } from '../api/index.js'
 
 export default function Join() {
   const navigate = useNavigate()
@@ -28,7 +28,11 @@ export default function Join() {
       localStorage.setItem('squadnight_token', session.token)
       localStorage.setItem('squadnight_username', session.user.username)
       localStorage.setItem('squadnight_userId', session.user.id)
-      navigate('/dashboard', { replace: true })
+      if (mode === 'register') navigate('/squad', { replace: true })
+      else {
+        const squad = await getMySquad()
+        navigate(squad ? '/dashboard' : '/squad', { replace: true })
+      }
     } catch (err) {
       setError(err.message || 'Could not connect. Please try again.')
     } finally { setBusy(false) }

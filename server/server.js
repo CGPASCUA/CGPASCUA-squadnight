@@ -3,6 +3,7 @@ import cors from 'cors'
 import { pool } from './db/pool.js'
 import * as repo from './squadnightRepo.js'
 import * as auth from './auth.js'
+import * as squads from './squadsRepo.js'
 
 const app = express()
 const allowedOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173')
@@ -54,6 +55,23 @@ app.use('/api', async (req, res, next) => {
     req.user = user
     next()
   } catch (error) { next(error) }
+})
+
+// Squad membership is always tied to the authenticated account.
+app.get('/api/squads/me', async (req, res, next) => {
+  try { res.json({ squad: await squads.getMySquad(pool, req.user.id) }) } catch (error) { next(error) }
+})
+app.post('/api/squads', async (req, res, next) => {
+  const name = typeof req.body?.name === 'string' ? req.body.name.trim() : ''
+  if (name.length < 2 || name.length > 60) return res.status(400).json({ error: 'Squad name must be 2–60 characters.' })
+  try { res.status(201).json({ squad: await squads.createSquad(pool, req.user.id, name) }) }
+  catch (error) { if (error.status) return res.status(error.status).json({ error: error.message }); next(error) }
+})
+app.post('/api/squads/join', async (req, res, next) => {
+  const code = typeof req.body?.code === 'string' ? req.body.code.trim() : ''
+  if (!/^[A-Z0-9]{8}$/i.test(code)) return res.status(400).json({ error: 'Enter the 8-character squad code.' })
+  try { res.json({ squad: await squads.joinSquad(pool, req.user.id, code) }) }
+  catch (error) { if (error.status) return res.status(error.status).json({ error: error.message }); next(error) }
 })
 
 app.get('/healthz', (_req, res) => res.json({ ok: true }))

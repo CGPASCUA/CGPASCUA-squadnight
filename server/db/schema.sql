@@ -41,3 +41,21 @@ CREATE TABLE IF NOT EXISTS auth_sessions (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS auth_sessions_expiry_idx ON auth_sessions (expires_at);
+
+-- Squads: each user may belong to one squad at a time; creators are the first member.
+CREATE TABLE IF NOT EXISTS squads (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL CHECK (char_length(name) BETWEEN 2 AND 60),
+  join_code TEXT NOT NULL UNIQUE,
+  created_by UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS squad_members (
+  squad_id UUID NOT NULL REFERENCES squads(id) ON DELETE CASCADE,
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  role TEXT NOT NULL DEFAULT 'member' CHECK (role IN ('owner', 'member')),
+  joined_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  PRIMARY KEY (squad_id, user_id),
+  UNIQUE (user_id)
+);
+CREATE INDEX IF NOT EXISTS squad_members_squad_idx ON squad_members (squad_id, joined_at);
