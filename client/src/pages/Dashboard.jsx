@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { listSessions, listGames, voteGame, getMySquad } from '../api/index.js'
+import { listSessions, listGames, voteGame, getMySquad, voteAttendance, getCurrentAccount } from '../api/index.js'
 import Card from '../components/Card.jsx'
 import Button from '../components/Button.jsx'
 import PollOption from '../components/PollOption.jsx'
-import MemberBadge from '../components/MemberBadge.jsx'
 import DemoNotice from '../components/DemoNotice.jsx'
 
 export default function Dashboard() {
@@ -13,15 +12,17 @@ export default function Dashboard() {
   const [sessions, setSessions] = useState([])
   const [games, setGames] = useState([])
   const [squad, setSquad] = useState(null)
+  const [account, setAccount] = useState(null)
 
   async function load() {
     setStatus('loading')
     setError(null)
     try {
-      const [sessionRows, gameRows, currentSquad] = await Promise.all([listSessions(), listGames(), getMySquad()])
+      const [sessionRows, gameRows, currentSquad, currentAccount] = await Promise.all([listSessions(), listGames(), getMySquad(), getCurrentAccount()])
       setSessions(sessionRows)
       setGames(gameRows)
       setSquad(currentSquad)
+      setAccount(currentAccount.user)
       setStatus('ready')
     } catch (caught) {
       setError(caught)
@@ -33,8 +34,11 @@ export default function Dashboard() {
     load()
   }, [])
 
-  async function vote(id) {
-    setGames(await voteGame(id))
+  async function vote(id) { setGames(await voteGame(id)) }
+
+  async function setAttendance(session, attending) {
+    await voteAttendance(session.id, attending)
+    setSessions(await listSessions())
   }
 
   if (status === 'loading') return <div className="container">Loading…</div>
@@ -59,9 +63,7 @@ export default function Dashboard() {
 
       <div className="grid-2">
         {upcoming ? (
-          <Card title="Upcoming Game Night" meta={`${upcoming.game} · ${upcoming.date} · ${upcoming.time}`}>
-            <Link to={`/sessions/${upcoming.id}`}><Button variant="primary">View Session</Button></Link>
-          </Card>
+          <Card title="Upcoming Game Night" meta={`${upcoming.game} · ${upcoming.date} · ${upcoming.time}`}><p className="small">Will you join this game night?</p><div style={{display:'flex',gap:8,flexWrap:'wrap'}}><Button variant={upcoming.attendance?.[account?.username] === true ? 'primary' : 'ghost'} onClick={() => setAttendance(upcoming, true)}>I’ll attend</Button><Button variant={upcoming.attendance?.[account?.username] === false ? 'primary' : 'ghost'} onClick={() => setAttendance(upcoming, false)}>Can’t attend</Button><Link to={`/sessions/${upcoming.id}`}><Button variant="ghost">View Session</Button></Link></div><p className="small">Going: {[upcoming.creator_username, ...Object.entries(upcoming.attendance || {}).filter(([,yes]) => yes).map(([name]) => name)].filter(Boolean).filter((name, i, a) => a.indexOf(name) === i).join(', ') || 'No votes yet'}</p></Card>
         ) : (
           <Card title="Upcoming Game Night" meta="Nothing planned yet">
             <Link to="/planner"><Button variant="primary">Plan Game Night</Button></Link>
@@ -86,7 +88,7 @@ export default function Dashboard() {
       </div>
 
       <Card title="Recent Completed Sessions">
-        {recent.length === 0 && <p className="small">No completed sessions yet. Your squad's finished game nights will appear here.</p>}
+        {recent.length === 0 && <p className="small">No completed sessions yet.</p>}
         {recent.map((s) => (
           <div key={s.id} className="small" style={{ marginBottom: 6 }}>
             {s.game} — {s.date} — {s.report?.result}

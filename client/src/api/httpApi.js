@@ -49,3 +49,6 @@ export const getMySquad = async () => (await request('/api/squads/me')).squad
 export const createSquad = async (name) => (await request('/api/squads', { method: 'POST', body: JSON.stringify({ name }) })).squad
 export const joinSquad = async (code) => (await request('/api/squads/join', { method: 'POST', body: JSON.stringify({ code }) })).squad
 export const leaveSquad = async () => request('/api/squads/leave', { method: 'POST' })
+
+export const voteAttendance = (id, attending) => request(`/api/sessions/${id}/attendance`, { method: 'PUT', body: JSON.stringify({ attending }) })
+export const deleteSession = (id) => request(`/api/sessions/${id}`, { method: 'DELETE' })

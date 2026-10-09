@@ -64,3 +64,8 @@ CREATE INDEX IF NOT EXISTS squad_members_squad_idx ON squad_members (squad_id, j
 -- Useful membership lookup and consistency support for the live PostgreSQL database.
 CREATE INDEX IF NOT EXISTS squads_created_by_idx ON squads (created_by);
 CREATE INDEX IF NOT EXISTS squad_members_user_idx ON squad_members (user_id);
+
+-- Attendance votes for planned game nights. Existing sessions are preserved.
+ALTER TABLE sessions ADD COLUMN IF NOT EXISTS creator_username TEXT NOT NULL DEFAULT '';
+ALTER TABLE sessions ADD COLUMN IF NOT EXISTS creator_user_id UUID REFERENCES users(id) ON DELETE SET NULL;
+ALTER TABLE sessions ADD COLUMN IF NOT EXISTS attendance JSONB NOT NULL DEFAULT '{}'::jsonb;

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { listSessions } from '../api/index.js'
+import { listSessions, deleteSession, getCurrentAccount } from '../api/index.js'
 import Card from '../components/Card.jsx'
 
 export default function History() {
@@ -8,6 +8,8 @@ export default function History() {
   const [error, setError] = useState(null)
   const [sessions, setSessions] = useState([])
   const [search, setSearch] = useState('')
+  const [deleting, setDeleting] = useState(null)
+  const [account, setAccount] = useState(null)
 
   async function load() {
     setStatus('loading')
@@ -21,7 +23,7 @@ export default function History() {
     }
   }
 
-  useEffect(() => { load() }, [])
+  useEffect(() => { load(); getCurrentAccount().then(result => setAccount(result.user)).catch(() => {}) }, [])
 
   if (status === 'loading') return <div className="container">Loading…</div>
   if (status === 'error') {
@@ -31,6 +33,8 @@ export default function History() {
       </div>
     )
   }
+
+  async function remove(id) { if (!window.confirm('Delete this session from history? This cannot be undone.')) return; setDeleting(id); try { await deleteSession(id); setSessions(rows => rows.filter(row => String(row.id) !== String(id))) } catch (e) { setError(e); setStatus('error') } finally { setDeleting(null) } }
 
   const completed = sessions.filter((s) => s.status === 'completed')
   const filtered = completed.filter((s) => s.game.toLowerCase().includes(search.toLowerCase()))
@@ -43,7 +47,7 @@ export default function History() {
       <div className="grid-3">
         {filtered.map((s) => (
           <Card key={s.id} title={s.game} meta={`${s.date} · ${s.report?.result} · ${'★'.repeat(Number(s.report?.rating) || 0)}`}>
-            <Link to={`/sessions/${s.id}`}>View Session</Link>
+            <div style={{display:'flex',gap:12,alignItems:'center'}}><Link to={`/sessions/${s.id}`}>View Session</Link>{s.creator_user_id === account?.id && <button type="button" onClick={() => remove(s.id)} disabled={deleting === s.id}>{deleting === s.id ? 'Deleting…' : 'Delete'}</button>}</div>
           </Card>
         ))}
       </div>

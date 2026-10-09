@@ -124,8 +124,16 @@ app.get('/api/sessions/:id', async (req, res, next) => {
 app.post('/api/sessions', async (req, res, next) => {
   const { errors, value } = validateSession(req.body ?? {})
   if (errors.length) return fail(res, errors.join('; '))
-  try { res.status(201).json(await repo.createSession(pool, value)) } catch (e) { next(e) }
+  try { res.status(201).json(await repo.createSession(pool, value, req.user.username, req.user.id)) } catch (e) { next(e) }
 })
+app.put('/api/sessions/:id/attendance', async (req, res, next) => {
+  if (typeof req.body?.attending !== 'boolean') return fail(res, 'attending must be true or false')
+  try { const row = await repo.voteAttendance(pool, req.params.id, req.user.id, req.user.username, req.body.attending); if (!row) return res.status(404).json({ error: 'Planned session not found' }); res.json(row) } catch (e) { next(e) }
+})
+app.delete('/api/sessions/:id', async (req, res, next) => {
+  try { const deleted = await repo.deleteSession(pool, req.params.id, req.user.id); if (!deleted) return res.status(404).json({ error: 'Session not found' }); res.status(204).end() } catch (e) { next(e) }
+})
+
 app.patch('/api/sessions/:id', async (req, res, next) => {
   const { errors, value } = validateSession(req.body ?? {}, true)
   if (errors.length) return fail(res, errors.join('; '))
