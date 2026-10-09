@@ -57,6 +57,19 @@ app.use('/api', async (req, res, next) => {
   } catch (error) { next(error) }
 })
 
+// Resolve the current account's squad for every squad-owned API operation.
+async function requireSquad(req, res, next) {
+  try {
+    const { rows } = await pool.query(
+      'SELECT squad_id FROM squad_members WHERE user_id = $1 LIMIT 1',
+      [req.user.id]
+    )
+    if (!rows[0]) return res.status(409).json({ error: 'Join or create a squad first.' })
+    req.squadId = rows[0].squad_id
+    next()
+  } catch (error) { next(error) }
+}
+
 // Squad membership is always tied to the authenticated account.
 app.get('/api/squads/me', async (req, res, next) => {
   try { res.json({ squad: await squads.getMySquad(pool, req.user.id) }) } catch (error) { next(error) }
@@ -115,44 +128,44 @@ function validateSession(body, partial = false) {
   return { errors, value }
 }
 
-app.get('/api/sessions', async (_req, res, next) => {
-  try { res.json(await repo.listSessions(pool)) } catch (e) { next(e) }
+app.get('/api/sessions', requireSquad, async (req, res, next) => {
+  try { res.json(await repo.listSessions(pool, req.squadId)) } catch (e) { next(e) }
 })
-app.get('/api/sessions/:id', async (req, res, next) => {
-  try { const row = await repo.getSession(pool, req.params.id); if (!row) return res.status(404).json({ error: 'Session not found' }); res.json(row) } catch (e) { next(e) }
+app.get('/api/sessions/:id', requireSquad, async (req, res, next) => {
+  try { const row = await repo.getSession(pool, req.params.id, req.squadId); if (!row) return res.status(404).json({ error: 'Session not found' }); res.json(row) } catch (e) { next(e) }
 })
-app.post('/api/sessions', async (req, res, next) => {
+app.post('/api/sessions', requireSquad, async (req, res, next) => {
   const { errors, value } = validateSession(req.body ?? {})
   if (errors.length) return fail(res, errors.join('; '))
-  try { res.status(201).json(await repo.createSession(pool, value, req.user.username, req.user.id)) } catch (e) { next(e) }
+  try { res.status(201).json(await repo.createSession(pool, value, req.user.username, req.user.id, req.squadId)) } catch (e) { next(e) }
 })
-app.put('/api/sessions/:id/attendance', async (req, res, next) => {
+app.put('/api/sessions/:id/attendance', requireSquad, async (req, res, next) => {
   if (typeof req.body?.attending !== 'boolean') return fail(res, 'attending must be true or false')
-  try { const row = await repo.voteAttendance(pool, req.params.id, req.user.id, req.user.username, req.body.attending); if (!row) return res.status(404).json({ error: 'Planned session not found' }); res.json(row) } catch (e) { next(e) }
+  try { const row = await repo.voteAttendance(pool, req.params.id, req.user.id, req.user.username, req.body.attending, req.squadId); if (!row) return res.status(404).json({ error: 'Planned session not found' }); res.json(row) } catch (e) { next(e) }
 })
-app.delete('/api/sessions/:id', async (req, res, next) => {
-  try { const deleted = await repo.deleteSession(pool, req.params.id, req.user.id); if (!deleted) return res.status(404).json({ error: 'Session not found' }); res.status(204).end() } catch (e) { next(e) }
+app.delete('/api/sessions/:id', requireSquad, async (req, res, next) => {
+  try { const deleted = await repo.deleteSession(pool, req.params.id, req.user.id, req.squadId); if (!deleted) return res.status(404).json({ error: 'Session not found' }); res.status(204).end() } catch (e) { next(e) }
 })
 
-app.patch('/api/sessions/:id', async (req, res, next) => {
+app.patch('/api/sessions/:id', requireSquad, async (req, res, next) => {
   const { errors, value } = validateSession(req.body ?? {}, true)
   if (errors.length) return fail(res, errors.join('; '))
-  try { const row = await repo.updateSession(pool, req.params.id, value); if (!row) return res.status(404).json({ error: 'Session not found' }); res.json(row) } catch (e) { next(e) }
+  try { const row = await repo.updateSession(pool, req.params.id, value, req.squadId); if (!row) return res.status(404).json({ error: 'Session not found' }); res.json(row) } catch (e) { next(e) }
 })
-app.get('/api/games', async (_req, res, next) => {
-  try { res.json(await repo.listGames(pool)) } catch (e) { next(e) }
+app.get('/api/games', requireSquad, async (req, res, next) => {
+  try { res.json(await repo.listGames(pool, req.squadId)) } catch (e) { next(e) }
 })
-app.post('/api/games/:id/vote', async (req, res, next) => {
-  try { const rows = await repo.voteGame(pool, req.params.id); if (!rows) return res.status(404).json({ error: 'Game not found' }); res.json(rows) } catch (e) { next(e) }
+app.post('/api/games/:id/vote', requireSquad, async (req, res, next) => {
+  try { const rows = await repo.voteGame(pool, req.params.id, req.squadId); if (!rows) return res.status(404).json({ error: 'Game not found' }); res.json(rows) } catch (e) { next(e) }
 })
-app.get('/api/availability', async (_req, res, next) => {
-  try { res.json(await repo.getAvailability(pool)) } catch (e) { next(e) }
+app.get('/api/availability', requireSquad, async (req, res, next) => {
+  try { res.json(await repo.getAvailability(pool, req.squadId)) } catch (e) { next(e) }
 })
-app.put('/api/availability', async (req, res, next) => {
+app.put('/api/availability', requireSquad, async (req, res, next) => {
   // The frontend sends the user's availability object directly as the request body.
   const mine = req.body
   if (!mine || typeof mine !== 'object' || Array.isArray(mine)) return fail(res, 'availability body must be an object')
-  try { res.json(await repo.saveAvailability(pool, mine)) } catch (e) { next(e) }
+  try { res.json(await repo.saveAvailability(pool, mine, req.squadId)) } catch (e) { next(e) }
 })
 
 app.use((_req, res) => res.status(404).json({ error: 'No such route' }))

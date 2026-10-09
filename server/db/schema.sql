@@ -69,3 +69,32 @@ CREATE INDEX IF NOT EXISTS squad_members_user_idx ON squad_members (user_id);
 ALTER TABLE sessions ADD COLUMN IF NOT EXISTS creator_username TEXT NOT NULL DEFAULT '';
 ALTER TABLE sessions ADD COLUMN IF NOT EXISTS creator_user_id UUID REFERENCES users(id) ON DELETE SET NULL;
 ALTER TABLE sessions ADD COLUMN IF NOT EXISTS attendance JSONB NOT NULL DEFAULT '{}'::jsonb;
+
+
+-- Squad data isolation: each session belongs to one squad. Legacy sessions are
+-- assigned only when their creator's current squad can be identified.
+ALTER TABLE sessions ADD COLUMN IF NOT EXISTS squad_id UUID REFERENCES squads(id) ON DELETE CASCADE;
+UPDATE sessions AS se
+   SET squad_id = sm.squad_id
+  FROM squad_members AS sm
+ WHERE se.squad_id IS NULL
+   AND se.creator_user_id IS NOT NULL
+   AND sm.user_id = se.creator_user_id;
+
+CREATE INDEX IF NOT EXISTS sessions_squad_date_idx ON sessions (squad_id, date DESC);
+
+-- Game poll totals are stored per squad rather than on the shared game catalog.
+CREATE TABLE IF NOT EXISTS squad_game_votes (
+  squad_id UUID NOT NULL REFERENCES squads(id) ON DELETE CASCADE,
+  game_id TEXT NOT NULL REFERENCES games(id) ON DELETE CASCADE,
+  votes INTEGER NOT NULL DEFAULT 0 CHECK (votes >= 0),
+  PRIMARY KEY (squad_id, game_id)
+);
+
+-- Availability is private to a squad. The old singleton availability row is
+-- retained for safe migration compatibility but is no longer read by the API.
+CREATE TABLE IF NOT EXISTS squad_availability (
+  squad_id UUID PRIMARY KEY REFERENCES squads(id) ON DELETE CASCADE,
+  data JSONB NOT NULL DEFAULT '{}'::jsonb,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
