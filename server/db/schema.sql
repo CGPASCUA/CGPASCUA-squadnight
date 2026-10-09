@@ -98,3 +98,15 @@ CREATE TABLE IF NOT EXISTS squad_availability (
   data JSONB NOT NULL DEFAULT '{}'::jsonb,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+
+-- Each member has an independent weekly availability schedule.
+-- This intentionally does not copy the old shared singleton schedule because
+-- the old row does not record which account originally saved it.
+CREATE TABLE IF NOT EXISTS member_availability (
+  user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  squad_id UUID NOT NULL REFERENCES squads(id) ON DELETE CASCADE,
+  data JSONB NOT NULL DEFAULT '{}'::jsonb,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS member_availability_squad_idx ON member_availability (squad_id);

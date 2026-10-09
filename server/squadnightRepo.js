@@ -87,24 +87,41 @@ export async function voteGame(pool, id, squadId) {
   } finally { client.release() }
 }
 
-export async function getAvailability(pool, squadId) {
-  const { rows } = await pool.query(
-    'SELECT data FROM squad_availability WHERE squad_id = $1',
-    [squadId]
+export async function getAvailability(pool, userId, squadId) {
+  const mineResult = await pool.query(
+    'SELECT data FROM member_availability WHERE user_id = $1 AND squad_id = $2',
+    [userId, squadId]
   )
-  return rows[0]?.data ?? { mine: {}, others: [] }
+  const membersResult = await pool.query(
+    `SELECT u.id, u.username, ma.data
+       FROM squad_members sm
+       JOIN users u ON u.id = sm.user_id
+       LEFT JOIN member_availability ma ON ma.user_id = u.id AND ma.squad_id = sm.squad_id
+      WHERE sm.squad_id = $1 AND sm.user_id <> $2
+      ORDER BY sm.joined_at, u.username`,
+    [squadId, userId]
+  )
+  const others = membersResult.rows.map((member) => {
+    const data = member.data && typeof member.data === 'object' ? member.data : {}
+    const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    const available = dayLabels
+      .filter((day) => data[day]?.checked)
+      .map((day) => `${day} ${data[day].start || ''}–${data[day].end || ''}`)
+    return { id: member.id, name: member.username, days: available.length ? available.join(', ') : 'No available days shared yet' }
+  })
+  return { mine: mineResult.rows[0]?.data ?? {}, others }
 }
 
-export async function saveAvailability(pool, mine, squadId) {
-  const current = await getAvailability(pool, squadId)
-  const updated = { ...current, mine }
+export async function saveAvailability(pool, userId, squadId, mine) {
   const { rows } = await pool.query(
-    `INSERT INTO squad_availability (squad_id, data) VALUES ($1, $2::jsonb)
-     ON CONFLICT (squad_id) DO UPDATE SET data=EXCLUDED.data, updated_at=now()
+    `INSERT INTO member_availability (user_id, squad_id, data, updated_at)
+     VALUES ($1, $2, $3::jsonb, now())
+     ON CONFLICT (user_id) DO UPDATE
+       SET squad_id = EXCLUDED.squad_id, data = EXCLUDED.data, updated_at = now()
      RETURNING data`,
-    [squadId, json(updated)]
+    [userId, squadId, json(mine)]
   )
-  return rows[0].data
+  return await getAvailability(pool, userId, squadId)
 }
 
 export async function voteAttendance(pool, id, userId, username, attending, squadId) {

@@ -159,13 +159,13 @@ app.post('/api/games/:id/vote', requireSquad, async (req, res, next) => {
   try { const rows = await repo.voteGame(pool, req.params.id, req.squadId); if (!rows) return res.status(404).json({ error: 'Game not found' }); res.json(rows) } catch (e) { next(e) }
 })
 app.get('/api/availability', requireSquad, async (req, res, next) => {
-  try { res.json(await repo.getAvailability(pool, req.squadId)) } catch (e) { next(e) }
+  try { res.json(await repo.getAvailability(pool, req.user.id, req.squadId)) } catch (e) { next(e) }
 })
 app.put('/api/availability', requireSquad, async (req, res, next) => {
   // The frontend sends the user's availability object directly as the request body.
   const mine = req.body
   if (!mine || typeof mine !== 'object' || Array.isArray(mine)) return fail(res, 'availability body must be an object')
-  try { res.json(await repo.saveAvailability(pool, mine, req.squadId)) } catch (e) { next(e) }
+  try { res.json(await repo.saveAvailability(pool, req.user.id, req.squadId, mine)) } catch (e) { next(e) }
 })
 
 app.use((_req, res) => res.status(404).json({ error: 'No such route' }))
