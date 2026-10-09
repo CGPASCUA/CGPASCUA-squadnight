@@ -1,100 +1,87 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { listGames, voteGame, createSession } from '../api/index.js'
+import { createSession, getMySquad } from '../api/index.js'
 import Card from '../components/Card.jsx'
 import Button from '../components/Button.jsx'
-import PollOption from '../components/PollOption.jsx'
 
-const allMembers = ['You', 'Member A', 'Member B', 'Member C', 'Member D']
+const CATEGORIES = [
+['FPS / Tactical', ['VALORANT','Counter-Strike 2','Overwatch 2','Rainbow Six Siege','Apex Legends','The Finals','Team Fortress 2','Paladins','Rogue Company','Spectre Divide']],
+['MOBA / Strategy', ['League of Legends','Dota 2','Heroes of the Storm','Smite / Smite 2','Civilization VI','Age of Empires IV','Stellaris','Teamfight Tactics','StarCraft II','Warcraft III: Reforged']],
+['Co-op / Action', ['Helldivers 2','Left 4 Dead 2','Warframe','Destiny 2','Deep Rock Galactic','Payday 3','Warhammer 40,000: Space Marine 2','Warhammer: Vermintide 2','Borderlands 3','Risk of Rain 2']],
+['Survival / Sandbox', ['Valheim','Rust','Minecraft','Terraria','ARK: Survival Ascended','Palworld','Sea of Thieves','Project Zomboid','Sons of the Forest','Enshrouded']],
+['Party / Casual / Other', ['Among Us','Lethal Company','Content Warning','Phasmophobia','Jackbox Party Pack','Rocket League','Pummel Party','Fall Guys','Dead by Daylight','Human Fall Flat']]
+]
 
 export default function Planner() {
   const navigate = useNavigate()
-  const [status, setStatus] = useState('loading')
-  const [error, setError] = useState(null)
-  const [games, setGames] = useState([])
-  const [finalGame, setFinalGame] = useState(null)
+  const [squad, setSquad] = useState(null)
+  const [game, setGame] = useState('')
+  const [custom, setCustom] = useState('')
+  const [search, setSearch] = useState('')
   const [date, setDate] = useState('')
   const [time, setTime] = useState('')
   const [players, setPlayers] = useState([])
-  const [note, setNote] = useState('')
-
-  async function load() {
-    setStatus('loading')
-    setError(null)
+  const [notes, setNotes] = useState('')
+  const [step, setStep] = useState(1)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+  useEffect(() => {
+    getMySquad().then(s => { setSquad(s); setPlayers((s?.members || []).map(m => m.username)) })
+      .catch(e => setError(e.message || 'Could not load squad members.'))
+      .finally(() => setLoading(false))
+  }, [])
+  const allGames = useMemo(() => CATEGORIES.flatMap(c => c[1]), [])
+  const chosen = game === '__custom__' ? custom.trim() : game
+  const visible = CATEGORIES.map(([name, list]) => [name, list.filter(g => g.toLowerCase().includes(search.toLowerCase()))]).filter(([, list]) => list.length)
+  function toggle(name) { setPlayers(old => old.includes(name) ? old.filter(p => p !== name) : [...old, name]) }
+  async function submit(e) {
+    e.preventDefault()
+    if (!chosen) { setError('Choose a game first.'); setStep(1); return }
+    if (!date || !time) { setError('Choose a date and time.'); return }
+    setSaving(true); setError('')
     try {
-      setGames(await listGames())
-      setStatus('ready')
-    } catch (caught) {
-      setError(caught)
-      setStatus('error')
-    }
+      const created = await createSession({ game: chosen, date, time, players, notes, status: 'planned' })
+      navigate(`/sessions/${created.id}`)
+    } catch (err) { setError(err.message || 'Could not save the game night.') }
+    finally { setSaving(false) }
   }
-
-  useEffect(() => { load() }, [])
-
-  async function vote(id) { setGames(await voteGame(id)) }
-
-  function lockInGame() {
-    const leading = [...games].sort((a, b) => b.votes - a.votes)[0]
-    setFinalGame(leading)
-  }
-
-  function togglePlayer(name) {
-    setPlayers((prev) => (prev.includes(name) ? prev.filter((p) => p !== name) : [...prev, name]))
-  }
-
-  async function finalizeGameNight() {
-    const created = await createSession({ game: finalGame.label, date, time, players, notes: note })
-    navigate(`/sessions/${created.id}`)
-  }
-
-  if (status === 'loading') return <div className="container">Loading…</div>
-  if (status === 'error') {
-    return (
-      <div className="container">
-        <p className="error" role="alert">{error.message} <button onClick={load}>Try again</button></p>
+  if (loading) return <div className="container">Loading your squad…</div>
+  return <div className="container">
+    <div className="step-label">STEP {step} OF 2 — {step === 1 ? 'CHOOSE THE GAME' : 'PLAN GAME NIGHT'}</div>
+    {error && <p className="error" role="alert">{error}</p>}
+    {step === 1 ? <Card title="Choose a game" meta={`${allGames.length} games available`}>
+      <input type="search" aria-label="Search games" placeholder="Search games…" value={search} onChange={e => setSearch(e.target.value)} style={{ marginBottom: 16 }} />
+      {visible.map(([category, list]) => <section key={category} style={{ marginBottom: 18 }}>
+        <h3 style={{ marginBottom: 8 }}>{category}</h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(190px, 1fr))', gap: 8 }}>
+          {list.map(name => <button type="button" key={name} aria-pressed={game === name} onClick={() => { setGame(name); setError('') }}
+            style={{ textAlign: 'left', padding: '12px 14px', borderRadius: 12, border: game === name ? '1px solid #fbbf24' : '1px solid var(--color-border)', background: game === name ? 'rgba(251,191,36,.14)' : 'var(--color-card)', color: 'inherit', cursor: 'pointer' }}>
+            {game === name ? '✓ ' : ''}{name}
+          </button>)}
+        </div>
+      </section>)}
+      <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: 16 }}>
+        <label htmlFor="custom-game">Not listed? Enter another game</label>
+        <input id="custom-game" placeholder="Custom game name" value={custom} onChange={e => { setCustom(e.target.value); if (e.target.value.trim()) setGame('__custom__') }} />
+        {game === '__custom__' && custom.trim() && <p className="small">Selected: <strong>{custom.trim()}</strong></p>}
       </div>
-    )
-  }
-
-  const totalVotes = games.reduce((sum, g) => sum + g.votes, 0)
-
-  return (
-    <div className="container">
-      <div className="step-label">Step 1 of 2 — Choose the Game</div>
-      <Card>
-        {games.map((g) => (
-          <PollOption key={g.id} label={g.label} votes={g.votes} totalVotes={totalVotes} onVote={() => vote(g.id)} />
-        ))}
-        {finalGame ? (
-          <div className="small">Locked in: {finalGame.label}</div>
-        ) : (
-          <Button variant="primary" onClick={lockInGame}>Lock in Final Game</Button>
-        )}
-      </Card>
-
-      {finalGame && (
-        <>
-          <div className="step-label">Step 2 of 2 — Create the Schedule</div>
-          <Card>
-            <div className="small" style={{ marginBottom: 8 }}>Selected Game: {finalGame.label}</div>
-            <label>Date</label>
-            <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-            <label>Time</label>
-            <input type="time" value={time} onChange={(e) => setTime(e.target.value)} />
-            <label>Players</label>
-            {allMembers.map((m) => (
-              <label key={m} style={{ display: 'inline-block', marginRight: 12 }}>
-                <input type="checkbox" style={{ width: 'auto', marginRight: 4 }} checked={players.includes(m)} onChange={() => togglePlayer(m)} />
-                {m}
-              </label>
-            ))}
-            <label style={{ marginTop: 12 }}>Session Note (optional)</label>
-            <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={3} />
-            <Button variant="accent" onClick={finalizeGameNight}>Create / Finalize Game Night</Button>
-          </Card>
-        </>
-      )}
-    </div>
-  )
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 18 }}>
+        <Button variant="primary" onClick={() => { if (!chosen) return setError('Select a game or enter a custom title.'); setError(''); setStep(2) }}>Continue with {chosen || 'selected game'}</Button>
+      </div>
+    </Card> : <form onSubmit={submit}><Card title="Schedule game night" meta={`Selected game: ${chosen}`}>
+      <p className="small">Selected game: <strong>{chosen}</strong></p>
+      <label htmlFor="planner-date">Date</label><input id="planner-date" type="date" required value={date} onChange={e => setDate(e.target.value)} />
+      <label htmlFor="planner-time">Time</label><input id="planner-time" type="time" required value={time} onChange={e => setTime(e.target.value)} />
+      <label>Squad members joining</label>
+      {squad?.members?.length ? <div style={{ display: 'grid', gap: 8, margin: '8px 0 16px' }}>{squad.members.map(m => <label key={m.id} style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+        <input type="checkbox" style={{ width: 'auto' }} checked={players.includes(m.username)} onChange={() => toggle(m.username)} />{m.username}{m.role === 'owner' ? ' · Owner' : ''}
+      </label>)}</div> : <p className="small">No squad members found; you can still schedule a game.</p>}
+      <label htmlFor="planner-notes">Session note (optional)</label><textarea id="planner-notes" rows={3} value={notes} onChange={e => setNotes(e.target.value)} placeholder="Anything the squad should know?" />
+      <div style={{ display: 'flex', gap: 10, marginTop: 16, flexWrap: 'wrap' }}>
+        <Button variant="primary" type="submit" disabled={saving}>{saving ? 'Saving…' : 'Create Game Night'}</Button>
+        <Button variant="ghost" onClick={() => setStep(1)}>Back</Button>
+      </div>
+    </Card></form>}
+  </div>
 }

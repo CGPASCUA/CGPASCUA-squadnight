@@ -86,12 +86,12 @@ export default function Dashboard() {
       </div>
 
       <Card title="Recent Completed Sessions">
-        <div className="badge-row" style={{ marginBottom: 'var(--space-2)' }}>
-          <MemberBadge initials="MP" color="#f59e0b" />
-          <MemberBadge initials="GM" color="#a855f7" />
-          <MemberBadge initials="PL" color="#0ea5e9" />
-        </div>
         {recent.length === 0 && <p className="small">No completed sessions yet.</p>}
+        {recent.length > 0 && <div className="badge-row" style={{ marginBottom: 'var(--space-2)' }}>
+          {[...new Set(recent.flatMap((session) => session.players || []))].slice(0, 8).map((name) => (
+            <MemberBadge key={name} initials={String(name).split(/\s+/).map((part) => part[0]).join('').slice(0, 2).toUpperCase()} />
+          ))}
+        </div>}
         {recent.map((s) => (
           <div key={s.id} className="small" style={{ marginBottom: 6 }}>
             {s.game} — {s.date} — {s.report?.result}
