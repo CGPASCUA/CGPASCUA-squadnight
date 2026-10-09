@@ -2,7 +2,10 @@ const BASE = import.meta.env.VITE_API_BASE_URL || ''
 
 async function request(path, options) {
   const response = await fetch(`${BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(localStorage.getItem('squadnight_token') ? { Authorization: `Bearer ${localStorage.getItem('squadnight_token')}` } : {}),
+    },
     ...options,
   })
 
@@ -33,3 +36,11 @@ export const voteGame = (id) => request(`/api/games/${id}/vote`, { method: 'POST
 export const getAvailability = () => request('/api/availability')
 export const saveAvailability = (mine) =>
   request('/api/availability', { method: 'PUT', body: JSON.stringify(mine) })
+
+export const registerAccount = (username, pin) =>
+  request('/api/auth/register', { method: 'POST', body: JSON.stringify({ username, pin }) })
+export const loginAccount = (username, pin) =>
+  request('/api/auth/login', { method: 'POST', body: JSON.stringify({ username, pin }) })
+export const logoutAccount = () =>
+  request('/api/auth/logout', { method: 'POST' })
+export const getCurrentAccount = () => request('/api/auth/me')

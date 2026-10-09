@@ -5,12 +5,13 @@ import {
   CalendarClock,
   Vote,
   History as HistoryIcon,
-  Copy,
-  Check,
+  LogOut,
   Moon,
   Sparkles,
 } from 'lucide-react'
 import Logo from './Logo.jsx'
+import { useNavigate } from 'react-router-dom'
+import { logoutAccount } from '../api/index.js'
 
 const NAV_ITEMS = [
   { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -21,8 +22,7 @@ const NAV_ITEMS = [
 
 export default function Header() {
   const username = localStorage.getItem('squadnight_username')
-  const squadCode = localStorage.getItem('squadnight_squadCode')
-  const [copied, setCopied] = useState(false)
+  const navigate = useNavigate()
   const [theme, setTheme] = useState(() => localStorage.getItem('squadnight_theme') || 'midnight')
 
   useEffect(() => {
@@ -30,12 +30,12 @@ export default function Header() {
     localStorage.setItem('squadnight_theme', theme)
   }, [theme])
 
-  function copyCode() {
-    if (!squadCode) return
-    navigator.clipboard?.writeText(squadCode).then(() => {
-      setCopied(true)
-      setTimeout(() => setCopied(false), 1500)
-    })
+  async function handleLogout() {
+    try { await logoutAccount() } catch { /* Clear the local session even if the API is unreachable. */ }
+    localStorage.removeItem('squadnight_token')
+    localStorage.removeItem('squadnight_username')
+    localStorage.removeItem('squadnight_userId')
+    navigate('/join', { replace: true })
   }
 
   function toggleTheme() {
@@ -59,13 +59,10 @@ export default function Header() {
       </nav>
 
       <div className="header-right">
-        {username && squadCode && (
-          <button className="squad-pill" onClick={copyCode} title="Copy squad code">
-            <span className="squad-pill-user">{username}</span>
-            <span className="squad-pill-code">{squadCode}</span>
-            {copied ? <Check size={13} /> : <Copy size={13} />}
-          </button>
-        )}
+        {username && <span className="squad-pill"><span className="squad-pill-user">{username}</span></span>}
+        <button className="theme-toggle" onClick={handleLogout} title="Log out" aria-label="Log out">
+          <LogOut size={16} />
+        </button>
         <button className="theme-toggle" onClick={toggleTheme} title="Toggle theme">
           {theme === 'midnight' ? <Sparkles size={16} /> : <Moon size={16} />}
         </button>

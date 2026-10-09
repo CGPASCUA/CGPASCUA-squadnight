@@ -3,50 +3,39 @@ import { useNavigate } from 'react-router-dom'
 import Card from '../components/Card.jsx'
 import Button from '../components/Button.jsx'
 import Logo from '../components/Logo.jsx'
-
-function randomSquadCode() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
-  let code = ''
-  for (let i = 0; i < 4; i++) code += chars[Math.floor(Math.random() * chars.length)]
-  return `SQUAD-${code}`
-}
+import { registerAccount, loginAccount } from '../api/index.js'
 
 export default function Join() {
   const navigate = useNavigate()
-  const [mode, setMode] = useState('join')
+  const [mode, setMode] = useState('login')
   const [username, setUsername] = useState('')
-  const [squadCode, setSquadCode] = useState('')
-  const [createdCode, setCreatedCode] = useState('')
+  const [pin, setPin] = useState('')
+  const [confirmPin, setConfirmPin] = useState('')
   const [error, setError] = useState('')
+  const [busy, setBusy] = useState(false)
 
-  function enterApp(name, code) {
-    localStorage.setItem('squadnight_username', name)
-    localStorage.setItem('squadnight_squadCode', code)
-    navigate('/dashboard')
-  }
-
-  function handleJoin(e) {
+  async function submit(e) {
     e.preventDefault()
-    if (!username.trim() || !squadCode.trim()) {
-      setError('Please enter both your name and a squad code.')
-      return
-    }
-    enterApp(username.trim(), squadCode.trim().toUpperCase())
-  }
-
-  function handleCreate(e) {
-    e.preventDefault()
-    if (!username.trim()) {
-      setError('Please enter your name first.')
-      return
-    }
-    setCreatedCode(randomSquadCode())
+    setError('')
+    if (!username.trim()) return setError('Please enter your username.')
+    if (!/^\d{4}$/.test(pin)) return setError('Your passcode must be exactly 4 numbers.')
+    if (mode === 'register' && pin !== confirmPin) return setError('The passcodes do not match.')
+    setBusy(true)
+    try {
+      const session = mode === 'register'
+        ? await registerAccount(username.trim(), pin)
+        : await loginAccount(username.trim(), pin)
+      localStorage.setItem('squadnight_token', session.token)
+      localStorage.setItem('squadnight_username', session.user.username)
+      localStorage.setItem('squadnight_userId', session.user.id)
+      navigate('/dashboard', { replace: true })
+    } catch (err) {
+      setError(err.message || 'Could not connect. Please try again.')
+    } finally { setBusy(false) }
   }
 
   function switchMode(next) {
-    setMode(next)
-    setError('')
-    setCreatedCode('')
+    setMode(next); setError(''); setPin(''); setConfirmPin('')
   }
 
   return (
@@ -57,55 +46,27 @@ export default function Join() {
           <h1>SquadNight</h1>
           <p className="small">Plan your squad's next game night.</p>
         </div>
-
         <div className="join-tabs">
-          <button className={`join-tab ${mode === 'join' ? 'active' : ''}`} onClick={() => switchMode('join')} type="button">
-            Join Squad
-          </button>
-          <button className={`join-tab ${mode === 'create' ? 'active' : ''}`} onClick={() => switchMode('create')} type="button">
-            Create Squad
-          </button>
+          <button className={`join-tab ${mode === 'login' ? 'active' : ''}`} onClick={() => switchMode('login')} type="button">Log In</button>
+          <button className={`join-tab ${mode === 'register' ? 'active' : ''}`} onClick={() => switchMode('register')} type="button">Create Account</button>
         </div>
-
         <Card>
-          {mode === 'join' && (
-            <form onSubmit={handleJoin}>
-              <label>Your Name</label>
-              <input value={username} onChange={(e) => setUsername(e.target.value)} placeholder="e.g. MikMik" />
-              <label>Squad Code</label>
-              <input value={squadCode} onChange={(e) => setSquadCode(e.target.value)} placeholder="e.g. SQUAD-4XJ2" />
-              {error && <div className="small" style={{ color: '#f87171', marginBottom: 12 }}>{error}</div>}
-              <Button type="submit" variant="accent">Join Squad</Button>
-              <div className="small" style={{ marginTop: 10 }}>
-                Don't have a code? Ask whoever created your squad, or switch to "Create Squad" to start your own.
-              </div>
-            </form>
-          )}
-
-          {mode === 'create' && !createdCode && (
-            <form onSubmit={handleCreate}>
-              <label>Your Name</label>
-              <input value={username} onChange={(e) => setUsername(e.target.value)} placeholder="e.g. MikMik" />
-              {error && <div className="small" style={{ color: '#f87171', marginBottom: 12 }}>{error}</div>}
-              <Button type="submit" variant="primary">Create Squad</Button>
-              <div className="small" style={{ marginTop: 10 }}>
-                We'll generate a squad code you can share with your friends.
-              </div>
-            </form>
-          )}
-
-          {mode === 'create' && createdCode && (
-            <div>
-              <label>Your squad code</label>
-              <div className="squad-code-display">{createdCode}</div>
-              <div className="small" style={{ marginBottom: 16 }}>
-                Share this with your squad so they can join with "Join Squad". You can find it again later in the header.
-              </div>
-              <Button variant="accent" onClick={() => enterApp(username.trim(), createdCode)}>
-                Continue to Dashboard
-              </Button>
+          <form onSubmit={submit}>
+            <label htmlFor="account-username">Username</label>
+            <input id="account-username" value={username} onChange={e => setUsername(e.target.value)} placeholder="Choose your username" autoComplete="username" maxLength={40} required />
+            <label htmlFor="account-pin">4-digit passcode</label>
+            <input id="account-pin" type="password" inputMode="numeric" pattern="[0-9]{4}" maxLength={4} autoComplete={mode === 'login' ? 'current-password' : 'new-password'} value={pin} onChange={e => setPin(e.target.value.replace(/\D/g, '').slice(0, 4))} placeholder="••••" aria-describedby="pin-help" required />
+            <div id="pin-help" className="small" style={{ marginTop: -6, marginBottom: 12 }}>Numbers only. Keep it private.</div>
+            {mode === 'register' && <>
+              <label htmlFor="account-confirm-pin">Confirm passcode</label>
+              <input id="account-confirm-pin" type="password" inputMode="numeric" pattern="[0-9]{4}" maxLength={4} autoComplete="new-password" value={confirmPin} onChange={e => setConfirmPin(e.target.value.replace(/\D/g, '').slice(0, 4))} placeholder="Re-enter your 4 digits" required />
+            </>}
+            {error && <div role="alert" className="small" style={{ color: '#f87171', marginBottom: 12 }}>{error}</div>}
+            <Button type="submit" variant="accent" disabled={busy}>{busy ? 'Please wait…' : mode === 'register' ? 'Create Account' : 'Log In'}</Button>
+            <div className="small" style={{ marginTop: 12 }}>
+              {mode === 'register' ? 'Your account is saved in the database. Your passcode is stored securely as a hash.' : "New to SquadNight? Create an account first."}
             </div>
-          )}
+          </form>
         </Card>
       </div>
     </div>

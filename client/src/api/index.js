@@ -15,3 +15,6 @@ export const {
   getAvailability,
   saveAvailability,
 } = implementation
+
+// Authentication always uses the real API; account credentials are never mocked.
+export const { registerAccount, loginAccount, logoutAccount, getCurrentAccount } = httpApi

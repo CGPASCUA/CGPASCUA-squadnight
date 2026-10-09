@@ -7,21 +7,25 @@ import Planner from './pages/Planner.jsx'
 import SessionDetails from './pages/SessionDetails.jsx'
 import History from './pages/History.jsx'
 
+function Protected({ children }) {
+  return localStorage.getItem('squadnight_token') ? children : <Navigate to="/join" replace />
+}
+
 export default function App() {
   const location = useLocation()
+  const authenticated = Boolean(localStorage.getItem('squadnight_token'))
   const hideHeader = location.pathname === '/join' || location.pathname === '/'
-
   return (
     <>
       {!hideHeader && <Header />}
       <Routes>
-        <Route path="/" element={<Navigate to="/join" replace />} />
-        <Route path="/join" element={<Join />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/availability" element={<Availability />} />
-        <Route path="/planner" element={<Planner />} />
-        <Route path="/sessions/:id" element={<SessionDetails />} />
-        <Route path="/history" element={<History />} />
+        <Route path="/" element={<Navigate to={authenticated ? '/dashboard' : '/join'} replace />} />
+        <Route path="/join" element={authenticated ? <Navigate to="/dashboard" replace /> : <Join />} />
+        <Route path="/dashboard" element={<Protected><Dashboard /></Protected>} />
+        <Route path="/availability" element={<Protected><Availability /></Protected>} />
+        <Route path="/planner" element={<Protected><Planner /></Protected>} />
+        <Route path="/sessions/:id" element={<Protected><SessionDetails /></Protected>} />
+        <Route path="/history" element={<Protected><History /></Protected>} />
       </Routes>
     </>
   )
