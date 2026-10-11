@@ -1,100 +1,145 @@
-# AI Usage
+# AI Usage Disclosure
 
-This project was developed primarily by the researchers. AI tools were used only as an **assistance and verification tool** throughout the development process. AI was used to help review ideas, clarify technical concepts, suggest possible solutions, and double-check implementation decisions. The researchers remained responsible for the actual coding, integration, testing, and final decisions made in the project.
+SquadNight was developed by the researchers with assistance from AI tools throughout the planning, implementation, debugging, and documentation process. AI was used to discuss design ideas, explain technical concepts, suggest code changes, troubleshoot errors, and review possible solutions. The researchers evaluated these suggestions, integrated relevant changes into the project, and remained responsible for reviewing and testing the final implementation.
+
+This document describes how AI assistance was used, including cases where suggestions were incorrect or unsuitable for the existing project.
 
 ## 1. How AI Was Used
 
 ### Week 1 – Wireframes and Component Planning
 
-* **Tool:** Claude
-* **Purpose:** Used as a reference and brainstorming tool to help review the planned wireframes, screen structure, component organization, and user flow for the five main screens: Dashboard, Availability, Planner, Session Details, and History.
-* **How it assisted:** AI provided suggestions for organizing the screens and identifying possible reusable components.
-* **What I did:** I reviewed the suggestions and used only the parts that were appropriate for the project's requirements. The actual interface structure and final component implementation were decided and implemented by me.
-* **Commit:** `<commit SHA>`
+- **Tool:** Claude
+- **Purpose:** To brainstorm and review the planned screen layouts, component organization, and navigation flow for the Dashboard, Availability, Planner, Session Details, and History screens.
+- **How AI assisted:** Suggested ways to organize pages and identify reusable interface components.
+- **Researcher contribution:** Reviewed the suggestions and determined which ideas matched the project requirements. The resulting interface and component implementation were reviewed and adapted for the project.
+- **Commit:** 
 
 ### Week 1 – Design System Review
 
-* **Tool:** Claude
-* **Purpose:** Used to double-check the consistency of the project's colors, typography, spacing, and reusable UI components.
-* **How it assisted:** AI suggested possible color tokens, typography sizes, spacing guidelines, and component organization that could be considered for the project.
-* **What I did:** I evaluated the suggestions and selected or adjusted the values based on the project's design requirements. The final design system and CSS implementation were manually integrated into the project.
-* **Commit:** `<SHA where the design system was added>`
+- **Tool:** Claude
+- **Purpose:** To review the consistency of colors, typography, spacing, and reusable UI components.
+- **How AI assisted:** Suggested design tokens, typography sizes, spacing guidelines, and component organization.
+- **Researcher contribution:** Evaluated and adjusted suggestions to suit the intended interface and integrated the selected changes into the project.
+- **Commit:** 
 
-### Week 1 – React Project Structure
+### Week 1 – React Project Structure and Routing
 
-* **Tool:** Claude
-* **Purpose:** Used as a technical reference while setting up and reviewing the React/Vite project structure and routing.
-* **How it assisted:** AI was used to explain possible approaches for organizing the five screens and routing between them.
-* **What I did:** I implemented and tested the structure in the actual project and made the necessary changes to match the class requirements and existing project template.
-* **Commit:** `<SHA for the initial project structure>`
+- **Tool:** Claude
+- **Purpose:** To understand and review the React/Vite project structure and navigation between application screens.
+- **How AI assisted:** Explained possible approaches to component organization and React Router configuration.
+- **Researcher contribution:** Applied and adjusted the relevant approaches to fit the existing project structure and course requirements.
+- **Commit:** 
 
-### Week 1 – API Layer and Class Template Integration
+### Week 1 – API Layer and Template Integration
 
-* **Tool:** Claude
-* **Purpose:** Used to review the existing class template and help understand how the frontend API layer was intended to work.
-* **How it assisted:** AI helped explain the relationship between `src/api/index.js`, `mockApi.js`, and `httpApi.js`, and suggested ways to keep the pages compatible with the template's mock/real-API structure.
-* **What I did:** I applied the appropriate changes to the project manually and tested the resulting data flow. The final architecture was based on the class template requirements rather than being generated wholesale by AI.
-* **Commit:** `<SHA for the template integration>`
+- **Tool:** Claude
+- **Purpose:** To understand the existing frontend API layer and its relationship with the mock and real API implementations.
+- **How AI assisted:** Explained the responsibilities of files such as `src/api/index.js`, `mockApi.js`, and `httpApi.js`, and suggested approaches for connecting the frontend to the backend.
+- **Researcher contribution:** Reviewed the existing implementation, applied relevant changes, and checked compatibility with the project's API contract.
+- **Commit:** 
 
-### Week 2 – Join / Create Squad Functionality
+### Week 2 – Squad Creation and Joining
 
-* **Tool:** Claude
-* **Purpose:** Used to review the onboarding flow and identify a missing functionality: allowing users to create a squad instead of only joining an existing squad.
-* **How it assisted:** AI suggested possible approaches for organizing a Join/Create interface and generating a squad code.
-* **What I did:** I evaluated the suggestion and implemented the required functionality into the existing project. The final interface, logic, and integration were tested and adjusted manually.
-* **Commit:** `<SHA for the Join/Create functionality>`
+- **Tool:** Claude and ChatGPT
+- **Purpose:** To identify and address issues in the squad onboarding and membership flow.
+- **How AI assisted:** Suggested approaches for creating squads, joining existing squads, generating or using squad codes, and making squad membership clearer to users.
+- **Researcher contribution:** Reviewed the suggestions and applied appropriate changes to the existing project. The implementation needed to preserve account-specific squad membership and existing application behavior.
+- **Commit:** 
 
-### Week 2 – Backend and API Contract Review
+### Week 2 – Backend, Database, and API Integration
 
-* **Tool:** Claude / Google AI Studio
-* **Purpose:** Used as a reference for reviewing the backend requirements and checking whether the planned Express/PostgreSQL API would properly communicate with the existing frontend.
-* **How it assisted:** AI helped identify possible routes, database entities, validation requirements, and API response structures that needed to be considered.
-* **What I did:** I reviewed the suggestions against the actual project requirements and existing frontend API contract. The backend implementation and final integration were handled and verified within the project.
-* **Commit:** `<SHA>`
+- **Tool:** Claude, Google AI Studio, and ChatGPT
+- **Purpose:** To review backend requirements and troubleshoot communication between the React frontend, Express API, and PostgreSQL database.
+- **How AI assisted:** Helped explain API routes, database relationships, environment configuration, schema initialization, and possible causes of integration errors.
+- **Researcher contribution:** Evaluated the suggestions against the existing codebase and project requirements, applied relevant fixes, and checked the application through development and database commands.
+- **Commit:** 
+
+### Week 2 – Debugging and Feature Corrections
+
+- **Tool:** ChatGPT
+- **Purpose:** To troubleshoot implementation issues involving squad membership, session attendance, database setup, API behavior, and frontend functionality.
+- **How AI assisted:** Explained error messages, suggested code modifications, and provided step-by-step debugging guidance.
+- **Researcher contribution:** Reviewed the suggested changes and applied relevant fixes within the existing project. Commands and code changes still required local verification.
+- **Commit:** 
+
+### Documentation
+
+- **Tool:** ChatGPT
+- **Purpose:** To help revise the project's README and AI usage disclosure.
+- **How AI assisted:** Suggested clearer explanations of the project's features, architecture, setup instructions, and AI-assisted development process.
+- **Researcher contribution:** Responsible for checking that the documentation accurately reflects the actual repository, deployment, and development process.
+- **Commit:** 
 
 ---
 
-## 2. Where AI Assistance Was Incorrect
+## 2. Where AI Assistance Was Incorrect or Needed Correction
 
-AI suggestions were not always accurate or compatible with the existing project. These cases were reviewed and corrected rather than being directly accepted.
+AI-generated suggestions were not always compatible with the existing repository. They were reviewed rather than automatically accepted.
 
-### Case 1 – Generated a Separate Application Instead of Assisting the Existing Project
+### Case 1 – Generating a Separate Application
 
-* **What it gave me:** Google AI Studio suggested and generated a separate application structure instead of working within the existing repository.
-* **What was wrong with it:** The suggested structure did not follow the required JavaScript-based project organization, existing React Router setup, frontend API layer, or Express/PostgreSQL architecture.
-* **What I did instead:** I did not use the generated application. I returned to the existing project structure and continued development using the required class template and existing codebase.
-* **Commit:** `<SHA, if applicable>`
+- **Tool:** Google AI Studio
+- **What happened:** A generated application structure was suggested instead of making changes directly within the existing project.
+- **Problem:** The proposed structure did not fully match the required JavaScript-based project, existing React Router setup, frontend API layer, and Express/PostgreSQL architecture.
+- **What the researchers did:** Returned to the existing repository and continued working within its established structure rather than replacing the project with an incompatible application.
+- **Commit:** 
 
 ### Case 2 – Incorrect Assumption About Git Changes
 
-* **What it gave me:** AI-assisted terminal work led to an incorrect assumption that the project's changes had already been successfully committed and pushed.
-* **What was wrong with it:** The changes were not actually reflected in the remote repository as expected.
-* **What I did instead:** I manually checked the repository using Git commands such as `git status` and reviewed the commit history. I then reapplied the necessary files, committed the actual changes, and verified that the repository contained the expected project files before continuing.
-* **Commit:** `<SHA of the verified commit>`
+- **Tool:** AI-assisted troubleshooting
+- **What happened:** There was confusion about whether project changes had already been committed and pushed successfully.
+- **Problem:** The remote repository did not reflect the expected changes.
+- **What the researchers did:** Checked the repository using Git commands, including `git status` and commit history, then verified the actual files and commits before continuing.
+- **Commit:** 
 
-### Case 3 – AI Suggestions Required Manual Verification
+### Case 3 – Suggestions That Did Not Match the Existing Implementation
 
-* **What it gave me:** Some AI suggestions regarding implementation details, project structure, or API behavior did not exactly match the requirements of the existing project.
-* **What was wrong with it:** AI suggestions were based on general development patterns and could not always account for the specific constraints of the class template and existing implementation.
-* **What I did instead:** I treated the suggestions only as references, checked them against the existing source code and project requirements, and manually corrected or rejected anything that did not fit.
-* **Commit:** `<SHA, if applicable>`
+- **Tool:** AI assistants used during development
+- **What happened:** Some suggestions about code structure, API behavior, or implementation details needed adjustment.
+- **Problem:** General recommendations did not always account for the project's existing code, backend behavior, or course requirements.
+- **What the researchers did:** Compared suggestions with the actual source code and requirements, then adapted or rejected unsuitable changes.
+- **Commit:** 
+
+### Case 4 – Frontend Redesign Compatibility
+
+- **Tool:** ChatGPT
+- **What happened:** A separate frontend redesign package was prepared for consideration.
+- **Problem:** It was not sufficiently verified against the current project before being considered for integration. Replacing files without checking compatibility could have affected existing features.
+- **What the researchers did:** Decided not to proceed with the redesign and retained the existing application design to prioritize the working project and submission.
+- **Commit:** 
 
 ---
 
-## 3. Who Wrote What
+## 3. Division of Work and Responsibility
 
-The **researchers/developers wrote and implemented the actual project code, interface, database integration, API integration, testing, and final project structure**.
+The researchers were responsible for the development and delivery of SquadNight, including project decisions, integration, testing, and final review.
 
-AI tools were used only as supplementary assistance for:
+AI tools assisted with:
 
-* Brainstorming and reviewing possible solutions
-* Clarifying programming concepts
-* Reviewing project structure
-* Suggesting possible approaches to implementation
-* Double-checking code and technical decisions
-* Identifying potential errors or missing functionality
-* Providing alternative approaches when troubleshooting
+- Brainstorming interface and component ideas.
+- Explaining React, JavaScript, Express, PostgreSQL, and API concepts.
+- Suggesting implementation approaches and code modifications.
+- Troubleshooting errors and interpreting terminal output.
+- Reviewing possible fixes for squad membership and session functionality.
+- Drafting and improving project documentation.
 
-The final implementation was **reviewed, modified, tested, and decided upon by the researchers**. AI-generated suggestions were not automatically incorporated into the project, and any suggestions that conflicted with the project requirements were rejected or revised.
+AI assistance was not a substitute for verifying the actual project. Suggestions had to be evaluated against the existing source code, database behavior, course requirements, and deployment setup.
 
-The researchers therefore remained responsible for the project's final design, code, functionality, integration, testing, and overall output.
+The researchers remained responsible for deciding which suggestions to use and for validating the submitted project. The precise division of manually written and AI-assisted code should be described according to the actual development history.
+
+## 4. Verification and Limitations
+
+AI-generated advice can contain errors, rely on assumptions, or propose changes that are incompatible with an existing codebase. For that reason, suggested changes should be checked through source-code review, Git history, local builds, application testing, and database/API checks as appropriate.
+
+A successful build alone does not establish that all features work correctly. Authentication, squad membership, session creation, attendance, and database persistence should be tested separately.
+
+The disclosure does not claim that every AI suggestion was correct or that every suggested fix was successfully tested. The final repository and its actual development history remain the basis for evaluating the completed project.
+
+## 5. Tools Used
+
+- **Claude:** Planning, design discussion, and technical assistance.
+- **Google AI Studio:** Application generation and technical exploration.
+- **ChatGPT:** Debugging guidance, implementation suggestions, backend troubleshooting, and documentation assistance.
+
+Only tools actually used during the project should remain listed in this section.
+
